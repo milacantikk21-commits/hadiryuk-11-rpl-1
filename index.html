@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HadirYuk - Absensi Digital</title>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Library QR Code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <section id="loginPage" class="login-page">
+    <div class="login-card">
+      <img src="assets/logo.svg" class="login-logo" alt="Logo HadirYuk">
+
+      <h1>Hadir<span>Yuk.</span></h1>
+      <p class="login-subtitle">Sistem Absensi Digital Sekolah</p>
+
+      <form id="loginForm">
+        <label>Login sebagai</label>
+        <select id="loginRole">
+          <option value="siswa">Siswa</option>
+          <option value="admin">Admin</option>
+        </select>
+
+        <label>Nama pengguna</label>
+        <input id="username" type="text" placeholder="Masukkan nama pengguna" required>
+
+        <label>Password</label>
+        <input id="password" type="password" placeholder="Masukkan password" required>
+
+        <button type="submit" class="btn-primary login-button">
+          Masuk Sekarang
+        </button>
+      </form>
+
+      <div class="login-info">
+        <p><b>Admin:</b> admin / admin123</p>
+        <p><b>Siswa:</b> Nama lengkap / siswa123</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- APLIKASI -->
+  <div id="app" class="app hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo.svg" alt="Logo HadirYuk">
+        <div>
+          <h2>HadirYuk</h2>
+          <small>Digital Attendance</small>
+        </div>
+      </div>
+
+      <div class="menu-title">MENU UTAMA</div>
+
+      <nav class="nav-menu">
+        <button class="nav-link active" data-page="dashboard">
+          <span>▦</span> Dashboard
+        </button>
+
+        <button class="nav-link admin-only" data-page="data">
+          <span>♙</span> Data Siswa
+        </button>
+
+        <button class="nav-link" data-page="absensi">
+          <span>✓</span> Absensi
+        </button>
+
+        <button class="nav-link admin-only" data-page="qr">
+          <span>▣</span> QR Code
+        </button>
+
+        <button class="nav-link" data-page="riwayat">
+          <span>◷</span> Riwayat
+        </button>
+
+        <button class="nav-link admin-only" data-page="laporan">
+          <span>▤</span> Laporan
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="profile-mini">
+          <div class="avatar" id="sidebarAvatar">A</div>
+          <div class="profile-text">
+            <b id="sidebarName">Admin</b>
+            <small id="sidebarRole">Administrator</small>
+          </div>
+        </div>
+
+        <button id="logoutBtn" class="logout-button">
+          ↪ Keluar
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p>Selamat datang di sistem absensi HadirYuk.</p>
+        </div>
+
+        <div class="topbar-right">
+          <div class="date-box">
+            <span>◷</span>
+            <b id="todayDate">-</b>
+          </div>
+          <div class="avatar top-avatar" id="topAvatar">A</div>
+        </div>
+      </header>
+
+      <!-- DASHBOARD -->
+      <section id="dashboardPage" class="page active-page">
+        <div class="welcome-card">
+          <div>
+            <span class="welcome-label">WELCOME BACK!</span>
+            <h1>Halo, <span id="welcomeName">Admin</span> 👋</h1>
+            <p>Kelola kehadiran kelas XI RPL 1 dengan mudah.</p>
+          </div>
+          <img src="assets/logo.svg" alt="HadirYuk">
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-icon purple">♙</div>
+            <div>
+              <p>Total Siswa</p>
+              <h2 id="totalSiswa">0</h2>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon green">✓</div>
+            <div>
+              <p>Hadir Hari Ini</p>
+              <h2 id="totalHadir">0</h2>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon orange">◷</div>
+            <div>
+              <p>Izin / Sakit</p>
+              <h2 id="totalIzin">0</h2>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon red">!</div>
+            <div>
+              <p>Belum Absen</p>
+              <h2 id="totalBelum">0</h2>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div class="panel">
+            <div class="panel-heading">
+              <div>
+                <h3>Absensi Hari Ini</h3>
+                <p>Ringkasan kehadiran siswa</p>
+              </div>
+              <span class="live-label">● LIVE</span>
+            </div>
+
+            <div class="attendance-progress">
+              <div class="progress-info">
+                <span>Persentase Kehadiran</span>
+                <b id="persentaseHadir">0%</b>
+              </div>
+              <div class="progress-track">
+                <div id="progressBar" class="progress-fill"></div>
+              </div>
+            </div>
+
+            <div class="quick-stats">
+              <div><span class="dot green-dot"></span> Hadir</div>
+              <div><span class="dot orange-dot"></span> Izin/Sakit</div>
+              <div><span class="dot red-dot"></span> Belum</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading">
+              <div>
+                <h3>Informasi Kelas</h3>
+                <p>Detail kelas aktif</p>
+              </div>
+              <span class="class-icon">▣</span>
+            </div>
+
+            <div class="class-info">
+              <div><span>Kelas</span><b>XI RPL 1</b></div>
+              <div><span>Sekolah</span><b>SMK Swasta Prama Artha</b></div>
+              <div><span>Tahun Ajaran</span><b>2026/2027</b></div>
+              <div><span>Sistem</span><b class="online-status">Online</b></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel table-panel">
+          <div class="panel-heading">
+            <div>
+              <h3>Absensi Terbaru</h3>
+              <p>Data kehadiran hari ini</p>
+            </div>
+            <button class="btn-light" data-goto="riwayat">Lihat Semua</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Siswa</th>
+                  <th>Waktu</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="dashboardTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- DATA SISWA -->
+      <section id="dataPage" class="page">
+        <div class="page-heading">
+          <div>
+            <h2>Data Siswa</h2>
+            <p>Kelola daftar siswa XI RPL 1.</p>
+          </div>
+          <button class="btn-primary" id="addStudentBtn">+ Tambah Siswa</button>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <input type="search" id="searchStudent" placeholder="Cari nama siswa...">
+            <span id="studentCount">0 siswa</span>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Siswa</th>
+                  <th>Status Hari Ini</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="studentTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABSENSI -->
+      <section id="absensiPage" class="page">
+        <div class="page-heading">
+          <div>
+            <h2>Absensi Siswa</h2>
+            <p>Lakukan absensi secara digital.</p>
+          </div>
+        </div>
+
+        <div class="attendance-options">
+          <div class="panel attendance-box">
+            <div class="big-icon purple">▣</div>
+            <h3>Scan QR Code</h3>
+            <p>Arahkan kamera ke QR Code absensi kelas.</p>
+            <button class="btn-primary" id="startScanner">Mulai Scan QR</button>
+            <div id="reader" class="reader"></div>
+            <button class="btn-light hidden" id="stopScanner">Hentikan Kamera</button>
+          </div>
+
+          <div class="panel attendance-box">
+            <div class="big-icon green">◉</div>
+            <h3>Konfirmasi Kamera</h3>
+            <p>Gunakan kamera untuk mengambil foto sebagai dokumentasi absensi.</p>
+            <video id="cameraPreview" autoplay playsinline class="camera-preview"></video>
+            <canvas id="photoCanvas" class="hidden"></canvas>
+            <button class="btn-primary" id="startCamera">Buka Kamera</button>
+            <button class="btn-light hidden" id="takePhoto">Ambil Foto</button>
+            <p id="cameraMessage" class="small-message"></p>
+          </div>
+        </div>
+
+        <div class="panel manual-panel admin-only">
+          <h3>Absensi Manual Admin</h3>
+          <p>Masukkan nama dan status kehadiran siswa.</p>
+
+          <form id="manualForm" class="manual-form">
+            <select id="manualStudent" required>
+              <option value="">Pilih siswa</option>
+            </select>
+
+            <select id="manualStatus" required>
+              <option value="Hadir">Hadir</option>
+              <option value="Izin">Izin</option>
+              <option value="Sakit">Sakit</option>
+              <option value="Alpa">Alpa</option>
+            </select>
+
+            <button class="btn-primary" type="submit">Simpan Absensi</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- QR CODE -->
+      <section id="qrPage" class="page">
+        <div class="page-heading">
+          <div>
+            <h2>QR Code Absensi</h2>
+            <p>Buat QR Code untuk absensi kelas.</p>
+          </div>
+        </div>
+
+        <div class="panel qr-panel">
+          <div class="qr-description">
+            <div class="big-icon purple">▣</div>
+            <h3>QR Code XI RPL 1</h3>
+            <p>QR Code berlaku untuk tanggal hari ini.</p>
+            <button class="btn-primary" id="generateQR">Buat QR Code</button>
+            <button class="btn-light" id="downloadQR">Unduh QR Code</button>
+          </div>
+
+          <div class="qr-display">
+            <div id="qrcode"></div>
+            <p id="qrDate">QR Code belum dibuat</p>
+          </div>
+        </div>
+
+        <div class="notice">
+          <b>Informasi:</b> QR Code versi ini adalah contoh untuk proyek sekolah.
+          Untuk penggunaan resmi, validasi QR harus dilakukan melalui server.
+        </div>
+      </section>
+
+      <!-- RIWAYAT -->
+      <section id="riwayatPage" class="page">
+        <div class="page-heading">
+          <div>
+            <h2>Riwayat Absensi</h2>
+            <p>Lihat catatan kehadiran siswa.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <input type="date" id="historyDate">
+            <input type="search" id="searchHistory" placeholder="Cari nama siswa...">
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Nama Siswa</th>
+                  <th>Jam</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="historyTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- LAPORAN -->
+      <section id="laporanPage" class="page">
+        <div class="page-heading">
+          <div>
+            <h2>Laporan Absensi</h2>
+            <p>Rekap data kehadiran siswa.</p>
+          </div>
+          <button class="btn-primary" id="printReport">Cetak Laporan</button>
+        </div>
+
+        <div class="stat-grid report-stats">
+          <div class="stat-card">
+            <div class="stat-icon green">✓</div>
+            <div><p>Total Hadir</p><h2 id="reportHadir">0</h2></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">◷</div>
+            <div><p>Total Izin</p><h2 id="reportIzin">0</h2></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">!</div>
+            <div><p>Total Sakit/Alpa</p><h2 id="reportLain">0</h2></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <input type="date" id="reportDate">
+            <button class="btn-light" id="refreshReport">Tampilkan</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Siswa</th>
+                  <th>Jam</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="reportTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        © 2026 HadirYuk · XI RPL 1 · SMK Swasta Prama Artha
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- MODAL TAMBAH SISWA -->
+  <div id="studentModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-heading">
+        <h3>Tambah Siswa</h3>
+        <button id="closeModal" class="close-modal">×</button>
+      </div>
+
+      <form id="studentForm">
+        <label>Nama Lengkap</label>
+        <input type="text" id="newStudentName" placeholder="Masukkan nama siswa" required>
+        <div class="modal-actions">
+          <button type="button" class="btn-light" id="cancelModal">Batal</button>
+          <button type="submit" class="btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
